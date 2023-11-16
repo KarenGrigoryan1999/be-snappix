@@ -106,8 +106,7 @@ services:
         image: nginx:latest
         # маршрутизируем порты
         ports:
-            - "8080:80"
-            - "7000:443"
+            - "443:443"
         restart: always
         volumes:
             - ./gateway/nginx.conf:/etc/nginx/nginx.conf
