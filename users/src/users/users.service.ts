@@ -101,7 +101,11 @@ export class UsersService {
     const user: IUserInfo = (await this.userRepository.findOne({
       where: { id },
       attributes: { exclude: ['password', 'activation_code'] },
-    })).toJSON();
+    }))?.toJSON();
+
+    if(!user) {
+      throw new ValidationExecption("User was not found");
+    }
 
     user.avatar = metadata.length != 0 ? metadata[0].filename : '';
 
