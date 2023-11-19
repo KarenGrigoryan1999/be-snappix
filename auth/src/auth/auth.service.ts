@@ -33,18 +33,16 @@ export class AuthService {
     const payload = {
       email: user.email,
       id: user.id,
-      roles: user.roles,
+      roles: user.roles.map(roleElement => roleElement.value),
     };
     return {
-      roles: user.roles,
       token: this.jwtService.sign(payload),
     };
   }
 
   private async validateUser(userDto: LoginUserDto) {
     const {data: user} = await firstValueFrom(this.httpService.get(`http://users-service:3001/api/users/email/${userDto.email}`));
-    if (user != null) {
-      console.log(userDto.password, user);
+    if (user) {
       const arePasswordsEquals = await bcrypt.compare(
         userDto.password,
         user.password,

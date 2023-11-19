@@ -5,6 +5,8 @@ import * as uuid from "uuid";
 
 import { Metadata } from './entities/metadata.entity';
 import { s3 } from 'src/s3.config';
+import { CreateFileDto } from './dto/create-file.dto';
+import { EntityType } from './entity-type.constant';
 
 @Injectable()
 export class MetadataService {
@@ -12,7 +14,16 @@ export class MetadataService {
     @InjectModel(Metadata) private readonly metaDataRepository: typeof Metadata,
   ) { }
 
-  async createFile(userFiles: any) {
+  getFiles(entityType: EntityType, entityId: number) {
+    return this.metaDataRepository.findAll({
+      where: {
+        entityId,
+        entityType,
+      }
+    });
+  }
+
+  async createFile(userFiles: any, dto: CreateFileDto) {
 
     const { files } = userFiles;
     const fileNames = [];
@@ -26,6 +37,8 @@ export class MetadataService {
       }, "/");
       await this.metaDataRepository.create({
         filename,
+        entityId: dto.entityId,
+        entityType: dto.entityType,
       });
     }
 

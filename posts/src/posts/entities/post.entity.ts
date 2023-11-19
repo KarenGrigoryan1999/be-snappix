@@ -3,10 +3,7 @@ import {
   DataType,
   Model,
   Table,
-  HasMany,
 } from 'sequelize-typescript';
-
-import { FileInfo } from '../../files/entities/file.entity';
 
 interface PostCreationAttrs {
   text: string;
@@ -28,7 +25,4 @@ export class Post extends Model<Post, PostCreationAttrs> {
 
   @Column({ type: DataType.INTEGER, allowNull: false })
   userId: number;
-
-  @HasMany(() => FileInfo)
-  files: FileInfo;
 }

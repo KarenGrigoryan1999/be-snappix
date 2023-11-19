@@ -3,7 +3,6 @@ import { SequelizeModule } from '@nestjs/sequelize';
 
 import { PostsModule } from './posts/posts.module';
 import { Post } from './posts/entities/post.entity';
-import { FileInfo } from './files/entities/file.entity';
 import { ConfigModule } from './config/config.module';
 import { ConfigService } from './config/config.service';
 
@@ -19,7 +18,7 @@ import { ConfigService } from './config/config.service';
         database: configService.getDatabaseName(),
         autoLoadModels: true,
         synchronize: true,
-        models: [Post, FileInfo],
+        models: [Post],
       }),
       imports: [ConfigModule],
       inject: [ConfigService],

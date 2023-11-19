@@ -1,4 +1,5 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query, Req, UploadedFiles, UseInterceptors } from '@nestjs/common';
+import { FileFieldsInterceptor } from '@nestjs/platform-express';
 
 import { Auth } from '../auth/roles-auth.decorator';
 import { ROLES } from '../roles/constants/roles.constant';
@@ -26,8 +27,26 @@ export class UsersController {
     return this.usersService.getUserById(id);
   }
 
+  @Get('open/:id')
+  getUserInfoById(@Param('id') id: string) {
+    return this.usersService.getUserInfoById(id);
+  }
+
   @Post()
   create(@Body() user: CreateUserDto) {
     return this.usersService.createUser(user);
+  }
+
+  @Auth(ROLES.ADMIN, ROLES.USER)
+  @Put('open/avatar')
+  @UseInterceptors(FileFieldsInterceptor([{ name: "files", maxCount: 1 }]))
+  updatePhoto(
+    @Req() req,
+    @UploadedFiles()
+    files: {
+      files?: any[];
+    }
+  ) {
+    return this.usersService.uploadAvatar(files, req.user);
   }
 }

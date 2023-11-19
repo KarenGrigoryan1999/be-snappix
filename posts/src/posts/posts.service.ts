@@ -1,16 +1,15 @@
 import { HttpService, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/sequelize';
-import { firstValueFrom, toArray } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 
 import { Post } from './entities/post.entity';
-import { FileInfo } from '../files/entities/file.entity';
 import { CreatePostDto } from './dto/createPost.dto';
+import { EntityType } from 'src/metadata/entity-type.constant';
 
 @Injectable()
 export class PostsService {
   constructor(
     @InjectModel(Post) private readonly postRepository: typeof Post,
-    @InjectModel(FileInfo) private readonly fileRepository: typeof FileInfo,
     private readonly httpService: HttpService,
   ) { }
 
@@ -23,19 +22,15 @@ export class PostsService {
     const FormData = require('form-data');
     const formData = new FormData();
     for (let file of files) {
+      formData.append('entityType', EntityType.POST);
+      formData.append('entityId', post.id);
       formData.append('files', file.buffer, file.originalname);
     }
-    const { data: fileNames } = await firstValueFrom(this.httpService.post(`http://metadata-service:3004/api/metadata`, formData, {
+    await firstValueFrom(this.httpService.post(`http://metadata-service:3004/api/metadata`, formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       }
     }));
-
-    fileNames.forEach(async (filename) => {
-      const file = await this.fileRepository.create({filename});
-
-      post.$set('files', file);
-    })
 
     return post;
   }
@@ -44,17 +39,14 @@ export class PostsService {
     const posts = await this.postRepository.findAll({
       offset: (page-1)*limit,
       limit,
-      include: [{
-        model: FileInfo,
-        attributes: {exclude: ['postId']}
-      }],
     });
 
     return await Promise.all(posts.map(async postElement => {
+      const {data: metadata} = await firstValueFrom(this.httpService.get(`http://metadata-service:3004/api/metadata?entityId=${postElement.id}&entityType=${EntityType.POST}`));
       const {data: postLikesInfo} = await firstValueFrom(this.httpService.get(`http://likes-service:3005/api/likes/count/${postElement.id}`));
       const {data: userInfo} = await firstValueFrom(this.httpService.get(`http://users-service:3001/api/users/${postElement.userId}`));
 
-      return {...postElement.toJSON(), likes: postLikesInfo.likes, username: userInfo.login};
+      return {...postElement.toJSON(), likes: postLikesInfo.likes, username: userInfo.login, files: metadata.map(metadataElement => metadataElement.filename)};
     }));
   }
 }

@@ -9,7 +9,7 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @UseInterceptors(FileFieldsInterceptor([{ name: "files", maxCount: 10 }]))
-  @Post()
+  @Post('open')
   create(@Body() postDto: CreatePostDto,
   @UploadedFiles()
   files: {
@@ -18,7 +18,7 @@ export class PostsController {
     return this.postsService.createPost(postDto, files);
   }
 
-  @Get()
+  @Get('open')
   getAllByPage(@Query('page') page = 1, @Query('limit') limit = 10) {
     return this.postsService.getAllByPage(page, limit);
   }

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { HttpModule, Module } from '@nestjs/common';
 import { SequelizeModule } from '@nestjs/sequelize';
 import { JwtModule } from '@nestjs/jwt';
 
@@ -29,6 +29,10 @@ import { ConfigModule } from 'src/config/config.module';
     }),
     ConfigModule,
     RolesModule,
+    HttpModule.register({
+      timeout: 5000,
+      maxRedirects: 5,
+    }),
   ],
   exports: [UsersService],
 })

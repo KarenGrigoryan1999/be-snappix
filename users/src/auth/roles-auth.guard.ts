@@ -27,11 +27,12 @@ export class RolesGuard implements CanActivate {
         context.getHandler(),
         context.getClass(),
       ]);
+
       if (requiredRoles === null) {
         return true;
       }
       const req = context.switchToHttp().getRequest();
-      const [authorization] = req.headers;
+      const {authorization} = req.headers;
       const [bearer, token] = authorization.split(' ');
 
       if (bearer !== 'Bearer' || token.toString() === '') {
@@ -42,7 +43,7 @@ export class RolesGuard implements CanActivate {
 
       const user = this.jwtService.verify(token);
       req.user = user;
-      return user.roles.some((role) => requiredRoles.includes(role.value));
+      return user.roles.some((role) => requiredRoles.includes(role));
     } catch (e) {
       throw new ValidationExecption('Нет прав для использования этого метода');
     }
