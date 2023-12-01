@@ -50,6 +50,9 @@ export class UsersService {
     if (await this.getUserByEmail(dto.email)) {
       throw new ValidationExecption("Такой Пользователь уже существует");
     }
+    if (await this.getUserByLogin(dto.login)) {
+      throw new ValidationExecption("Логин занят");
+    }
     const activationCode = uuid.v4();
 
     const hashPassword = await bcrypt.hash(
@@ -64,7 +67,7 @@ export class UsersService {
 
     const role = await this.rolesService.getRoleByValue(ROLES.USER);
     await user.$set('roles', role);
-    user.roles = [role];
+    user.roles = [role.toJSON()];
 
     return user;
   }
@@ -92,6 +95,12 @@ export class UsersService {
     return this.userRepository.findOne({
       where: { email },
       include: Role
+    });
+  }
+
+  async getUserByLogin(login: string) {
+    return this.userRepository.findOne({
+      where: { login },
     });
   }
 
