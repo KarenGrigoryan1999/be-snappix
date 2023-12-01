@@ -67,9 +67,12 @@ export class UsersService {
 
     const role = await this.rolesService.getRoleByValue(ROLES.USER);
     await user.$set('roles', role);
-    user.roles = [role.toJSON()];
 
-    return user;
+    const userObj = user.toJSON();
+
+    userObj.roles = [role.toJSON()];
+
+    return userObj;
   }
 
   async getAllUsers(page, perPage) {
